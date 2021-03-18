@@ -1,13 +1,20 @@
-#' Submit a protein file to effectorP
-
+# extract the 'refresh' header (used to check if result is done)
 refresh_header <- function(req){
     headers(req)[["refresh"]]
     
 }
 
+#' Submit a protein file to effectorP
+#' @import rvest 
+#' @import stringr
+#' @import httr
+#' @import progress
+#' @import xml2
+#' @export
+
 effectorP <- function(fasta_file, version="1", fasta=TRUE, outfile="effectorP.fasta"){
     software_version <- paste0("version", match.arg("1", c("1", "2")))
-    handle <- POST(URL, 
+    handle <- POST(base_url(), 
                    body=list( userfile  = upload_file(fasta_file), 
                    mode=software_version))
     res_url <- str_extract(refresh_header(handle), "http://.+")
@@ -36,6 +43,8 @@ effectorP <- function(fasta_file, version="1", fasta=TRUE, outfile="effectorP.fa
 
     
 
-
-
+funanno_table <- function(effector_tab){
+    genes <- sapply(strsplit(effector_tab[,1], " "), "[[",1)
+    data.frame(genes, "note", paste0("effectorP:", effector_tab[,2]))
 }
+
